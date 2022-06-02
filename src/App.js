@@ -1,23 +1,48 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
+//hiteshgu@flock.com
 import './App.css';
-
+import AllNotes from './components/AllNotes';
+import AddNewNote from './components/AddNewNote';
 function App() {
+  const [notes, setNotes]  = useState(JSON.parse(localStorage.getItem("Notes")) || []);
+  const defaultNote = {
+    noteId: '',
+    noteColor: '',
+    noteText: '',
+  };
+  const addNewNote = () => {
+    setNotes((prevNotes) => {
+      let newNote = {...defaultNote};
+      let randomColor = Math.floor(Math.random()*16777215).toString(16);
+      newNote.noteColor = randomColor;
+      newNote.noteId = Date.now();
+      prevNotes.push(newNote);
+      localStorage.setItem("Notes", JSON.stringify([...prevNotes]));
+      return [...prevNotes];
+    });
+  }
+  const editNote = (noteId, editedNote) => {
+    setNotes((prevNotes) => {
+      const newNote = prevNotes.map((note) => {
+        if(note.noteId === noteId)
+          note.noteText = editedNote;
+        return note;
+      });
+      localStorage.setItem("Notes", JSON.stringify([...newNote]));
+      return newNote;
+    });
+  }
+  const deleteNote = (noteId) => {
+    setNotes((prevNotes) => {
+      const newNotes = prevNotes.filter((note) => note.noteId !== noteId);
+      localStorage.setItem("Notes", JSON.stringify([...newNotes]));
+      return [...newNotes];
+    });
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <AddNewNote addNewNote={ addNewNote } />
+      <AllNotes editNote={ editNote } deleteNote={ deleteNote } notes={ notes }/>
     </div>
   );
 }
